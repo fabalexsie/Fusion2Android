@@ -25,6 +25,16 @@ const dataStorage = path.join(__dirname, 'data');
  *       - model.bin
  *  - project2-uuid
  *    - ...
+ *
+ * Supported endpoints:
+ * GET /api
+ *  - returns 'API is available'
+ * GET /api/newProject
+ *  - returns new project uuid and password
+ * GET /api/:project/models
+ *  - returns list of models in project with cover and link
+ * POST /api/:project/upload?pw=:pw
+ *  - uploads model file to model folder inside project folder and converts it to gltf
  */
 
 apiRouter.get('/', (req, res) => {
