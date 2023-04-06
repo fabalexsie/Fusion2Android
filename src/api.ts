@@ -69,58 +69,55 @@ apiRouter.get('/proj/:projectId/models', (req, res) => {
   res.send(modelList);
 });
 
-apiRouter.post(
-  '/proj/:project/upload?pw=:pw',
-  upload.single('model'),
-  (req, res) => {
-    // check user pw in db
-    // put model udsz file in user folder inside model name folder
-    // run python converter
-    // ~ https://stackoverflow.com/a/44424950
-    // return success or fail
-    checkProjectPw(req.params.project, req.params.pw).then((success) => {
-      if (success) {
-        if (
-          req.file &&
-          (path.basename(req.file.originalname).endsWith('.udsz') ||
-            path.basename(req.file.originalname).endsWith('.uds'))
-        ) {
-          const modelName = getModelName(req.file.originalname);
-          const modelFolder = path.join(
-            dataStorage,
-            req.params.project,
-            modelName
-          );
-          fs.mkdirSync(modelFolder, { recursive: true });
-          clearFolder(modelFolder);
+/** needs ?pw=:pw parameter */
+apiRouter.post('/proj/:project/upload', upload.single('model'), (req, res) => {
+  // check user pw in db
+  // put model udsz file in user folder inside model name folder
+  // run python converter
+  // ~ https://stackoverflow.com/a/44424950
+  // return success or fail
+  checkProjectPw(req.params.project, req.params.pw).then((success) => {
+    if (success) {
+      if (
+        req.file &&
+        (path.basename(req.file.originalname).endsWith('.udsz') ||
+          path.basename(req.file.originalname).endsWith('.uds'))
+      ) {
+        const modelName = getModelName(req.file.originalname);
+        const modelFolder = path.join(
+          dataStorage,
+          req.params.project,
+          modelName
+        );
+        fs.mkdirSync(modelFolder, { recursive: true });
+        clearFolder(modelFolder);
 
-          fs.writeFile(modelFolder, req.file.buffer, (err) => {
-            if (err) {
-              console.error(err);
-              res.status(500).send('Error writing file');
-            }
+        fs.writeFile(modelFolder, req.file.buffer, (err) => {
+          if (err) {
+            console.error(err);
+            res.status(500).send('Error writing file');
+          }
 
-            const pyExec = spawn('python', ['python/convert.py', modelFolder], {
-              cwd: path.dirname(__dirname),
-            });
-
-            pyExec.on('close', (code) => {
-              if (code === 0) {
-                res.send('Success');
-              } else {
-                res.status(500).send('Error converting file');
-              }
-            });
+          const pyExec = spawn('python', ['python/convert.py', modelFolder], {
+            cwd: path.dirname(__dirname),
           });
-        } else {
-          res.status(400).send("File isn't a uds(z) file");
-        }
+
+          pyExec.on('close', (code) => {
+            if (code === 0) {
+              res.send('Success');
+            } else {
+              res.status(500).send('Error converting file');
+            }
+          });
+        });
       } else {
-        res.status(403).send("Password doesn't match");
+        res.status(400).send("File isn't a uds(z) file");
       }
-    });
-  }
-);
+    } else {
+      res.status(403).send("Password doesn't match");
+    }
+  });
+});
 
 function clearFolder(directory: string) {
   for (const file of fs.readdirSync(directory)) {

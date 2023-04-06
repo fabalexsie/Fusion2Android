@@ -1,5 +1,5 @@
 import { Params, useLoaderData } from 'react-router-dom';
-import api, { Model } from './api';
+import api, { Model } from './apiService';
 import {
   Button,
   Card,
@@ -54,11 +54,7 @@ export function ProjectPage() {
               </Button>
             </Card>
           ))}
-          <Card padding="lg" radius="md">
-            <Card.Section>
-              <DropZoneModel projectId={projectId} />
-            </Card.Section>
-          </Card>
+          <DropZoneModel projectId={projectId} />
         </SimpleGrid>
       </>
     </Container>
