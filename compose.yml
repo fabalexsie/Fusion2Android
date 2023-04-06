@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  app:
+    build: ./
+    environment:
+      - PORT=8090
+      - IS_DEV=false
+    ports:
+      - 8090:8090
