@@ -1,5 +1,4 @@
 import { randomUUID } from 'crypto';
-import { resolve } from 'path';
 import sqlite3 from 'sqlite3';
 const db = new sqlite3.Database('data/db.sqlite');
 
@@ -9,7 +8,7 @@ type Project = {
 };
 
 db.serialize(() => {
-  db.run('CREATE TABLE projects IF NOT EXISTS (projectid TEXT, pw TEXT)');
+  db.run('CREATE TABLE IF NOT EXISTS projects (projectid TEXT, pw TEXT)');
 });
 
 export function getNewProject(): Project {

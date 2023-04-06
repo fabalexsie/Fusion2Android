@@ -9,22 +9,23 @@ export const apiRouter = express.Router();
 
 const upload = multer({ dest: 'data/uploads' });
 
-const dataStorage = path.join(__dirname, 'data');
+const dataStorage = path.join(path.dirname(__dirname), 'data', 'userFiles');
 /*
  * File structure:
  * data
- *   - project1-uuid
- *     - model1-name
- *       - cover.png (#TODO)
- *       - model.udsz
- *       - model.png
- *       - model.bin
- *     - model2-name
- *       - model.udsz
- *       - model.png
- *       - model.bin
- *  - project2-uuid
- *    - ...
+ *   - userFiles
+ *     - project1-uuid
+ *       - model1-name
+ *         - cover.png (#TODO)
+ *         - model.udsz
+ *         - model.png
+ *         - model.bin
+ *       - model2-name
+ *         - model.udsz
+ *         - model.png
+ *         - model.bin
+ *    - project2-uuid
+ *      - ...
  *
  * Supported endpoints:
  * GET /api
@@ -41,31 +42,35 @@ apiRouter.get('/', (req, res) => {
   res.send('API is available');
 });
 
+/**
+ * Example response: {projectId: 2b4c5076-10c2-4598-9be6-85ffae68c7fe, pw: 590b2801-cc47-4c2d-9233-433891fb86db}
+ */
 apiRouter.get('/newProject', (req, res) => {
   const proj = getNewProject();
+  fs.mkdirSync(path.join(dataStorage, proj.projectId), { recursive: true });
   res.send(proj);
 });
 
-apiRouter.get('/:project/models', (req, res) => {
+apiRouter.get('/proj/:projectId/models', (req, res) => {
   // check user folder for model names
   // return list of model names (for google link)
   const modelList = fs
-    .readdirSync(path.join(dataStorage, req.params.project))
+    .readdirSync(path.join(dataStorage, req.params.projectId))
     .map((folderName) => {
       const starterFile = fs
         .readdirSync(folderName)
         .filter((file) => path.extname(file) === '.gltf')[0];
       return {
         name: folderName,
-        cover: `/${req.params.project}/${folderName}/cover.png`,
-        link: `/${req.params.project}/${folderName}/${starterFile}`,
+        cover: `/${req.params.projectId}/${folderName}/cover.png`,
+        link: `/${req.params.projectId}/${folderName}/${starterFile}`,
       };
     });
   res.send(modelList);
 });
 
 apiRouter.post(
-  '/:project/upload?pw=:pw',
+  '/proj/:project/upload?pw=:pw',
   upload.single('model'),
   (req, res) => {
     // check user pw in db
@@ -91,7 +96,7 @@ apiRouter.post(
 
           fs.writeFile(modelFolder, req.file.buffer, (err) => {
             if (err) {
-              console.log(err);
+              console.error(err);
               res.status(500).send('Error writing file');
             }
 
@@ -126,6 +131,6 @@ function clearFolder(directory: string) {
 function getModelName(fileName: string): string {
   return path
     .basename(fileName, '.udsz')
-    .replace(/v[0-9]+/g, '')
+    .replace(/\sv[0-9]+/g, '')
     .trim();
 }
