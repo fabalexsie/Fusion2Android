@@ -78,7 +78,7 @@ export function RootPage() {
               />
             </MediaQuery>
             <Image
-              src={'favicon.svg'}
+              src={'/favicon.svg'}
               height={'34px'}
               width={'34px'}
               fit="contain"

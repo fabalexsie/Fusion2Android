@@ -13,6 +13,11 @@ app.use('/models', express.static('data/userFiles'));
 
 app.use('/api', apiRouter);
 
+// nothing else matches, so send index.html (react router will handle the rest)
+app.use('*', (req, res) => {
+  res.sendFile('index.html', { root: 'frontend/build' });
+});
+
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
