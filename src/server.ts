@@ -9,6 +9,8 @@ const app = express();
 
 app.use(express.static('frontend/build'));
 
+app.use('/models', express.static('data/userFiles'));
+
 app.use('/api', apiRouter);
 
 app.listen(port, () => {

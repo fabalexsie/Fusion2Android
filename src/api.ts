@@ -3,7 +3,7 @@ import { checkProjectPw, getNewProject } from './db';
 import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
-import { spawn } from 'child_process';
+import { exec } from 'child_process';
 
 export const apiRouter = express.Router();
 
@@ -54,18 +54,24 @@ apiRouter.get('/newProject', (req, res) => {
 apiRouter.get('/proj/:projectId/models', (req, res) => {
   // check user folder for model names
   // return list of model names (for google link)
-  const modelList = fs
-    .readdirSync(path.join(dataStorage, req.params.projectId))
-    .map((folderName) => {
+  const projFolder = path.join(dataStorage, req.params.projectId);
+  const modelList = fs.readdirSync(projFolder).map((folderName) => {
+    let link = '';
+    try {
+      console.log(`try to read inside ${folderName}`);
       const starterFile = fs
-        .readdirSync(folderName)
+        .readdirSync(path.join(projFolder, folderName))
         .filter((file) => path.extname(file) === '.gltf')[0];
-      return {
-        name: folderName,
-        cover: `/${req.params.projectId}/${folderName}/cover.png`,
-        link: `/${req.params.projectId}/${folderName}/${starterFile}`,
-      };
-    });
+      link = `/models/${req.params.projectId}/${folderName}/${starterFile}`;
+    } catch (e) {
+      console.error(`starter file doesn't exist for ${folderName}`);
+    }
+    return {
+      name: folderName,
+      cover: `/models/${req.params.projectId}/${folderName}/cover.png`,
+      link: link,
+    };
+  });
   res.send(modelList);
 });
 
@@ -81,7 +87,7 @@ apiRouter.get('/proj/:projectId/checkPw', (req, res) => {
 /** needs ?pw=:pw parameter */
 apiRouter.post('/proj/:project/upload', upload.single('model'), (req, res) => {
   // check user pw in db
-  // put model usdz file in user folder inside model name folder
+  // locate file in upload folder
   // run python converter
   // ~ https://stackoverflow.com/a/44424950
   // return success or fail
@@ -102,23 +108,35 @@ apiRouter.post('/proj/:project/upload', upload.single('model'), (req, res) => {
         fs.mkdirSync(modelFolder, { recursive: true });
         clearFolder(modelFolder);
 
-        fs.writeFile(modelFolder, req.file.buffer, (err) => {
-          if (err) {
-            console.error(err);
-            res.status(500).send('Error writing file');
-          }
+        const newFilePath = `${req.file.path}.usdz`;
+        fs.renameSync(req.file.path, newFilePath);
 
-          const pyExec = spawn('python', ['python/convert.py', modelFolder], {
+        // TODO: check if we are in docker container, then no need to activate conda env
+        const pyExec = exec(
+          `conda activate usdz && python "python/usdz2gltf.py" "${newFilePath}" "${modelFolder}"`,
+          {
             cwd: path.dirname(__dirname),
+          }
+        );
+
+        /*
+        if (pyExec.stdout)
+          pyExec.stdout.on('data', (data) => {
+            console.log(`stdout: ${data}`);
           });
 
-          pyExec.on('close', (code) => {
-            if (code === 0) {
-              res.send('Success');
-            } else {
-              res.status(500).send('Error converting file');
-            }
+        if (pyExec.stderr)
+          pyExec.stderr.on('data', (data) => {
+            console.error(`stderr: ${data}`);
           });
+        */
+
+        pyExec.on('close', (code) => {
+          if (code === 0) {
+            res.send({ success: true });
+          } else {
+            res.status(500).send('Error converting file');
+          }
         });
       } else {
         res.status(400).send("File isn't a uds(z) file");
