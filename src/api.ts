@@ -133,7 +133,7 @@ apiRouter.post('/proj/:project/upload', upload.single('model'), (req, res) => {
             });
         } else {
           pyExec = exec(
-            `python "python/usdz2gltf.py" "${newFilePath}" "${modelFolder}"`,
+            `python3 "python/usdz2gltf.py" "${newFilePath}" "${modelFolder}"`,
             {
               cwd: path.dirname(__dirname),
             }
