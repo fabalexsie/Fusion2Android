@@ -58,7 +58,6 @@ apiRouter.get('/proj/:projectId/models', (req, res) => {
   const modelList = fs.readdirSync(projFolder).map((folderName) => {
     let link = '';
     try {
-      console.log(`try to read inside ${folderName}`);
       const starterFile = fs
         .readdirSync(path.join(projFolder, folderName))
         .filter((file) => path.extname(file) === '.gltf')[0];
@@ -111,29 +110,36 @@ apiRouter.post('/proj/:project/upload', upload.single('model'), (req, res) => {
         const newFilePath = `${req.file.path}.usdz`;
         fs.renameSync(req.file.path, newFilePath);
 
-        // TODO: check if we are in docker container, then no need to activate conda env
-        const pyExec = exec(
-          `conda activate usdz && python "python/usdz2gltf.py" "${newFilePath}" "${modelFolder}"`,
-          {
-            cwd: path.dirname(__dirname),
-          }
-        );
+        let pyExec;
+        if (process.env.IS_DEV === 'true') {
+          pyExec = exec(
+            `conda activate usdz && python "python/usdz2gltf.py" "${newFilePath}" "${modelFolder}"`,
+            {
+              cwd: path.dirname(__dirname),
+            }
+          );
+          if (pyExec.stdout)
+            pyExec.stdout.on('data', (data) => {
+              console.log(`stdout: ${data}`);
+            });
 
-        /*
-        if (pyExec.stdout)
-          pyExec.stdout.on('data', (data) => {
-            console.log(`stdout: ${data}`);
-          });
-
-        if (pyExec.stderr)
-          pyExec.stderr.on('data', (data) => {
-            console.error(`stderr: ${data}`);
-          });
-        */
+          if (pyExec.stderr)
+            pyExec.stderr.on('data', (data) => {
+              console.error(`stderr: ${data}`);
+            });
+        } else {
+          pyExec = exec(
+            `python "python/usdz2gltf.py" "${newFilePath}" "${modelFolder}"`,
+            {
+              cwd: path.dirname(__dirname),
+            }
+          );
+        }
 
         pyExec.on('close', (code) => {
           if (code === 0) {
             res.send({ success: true });
+            fs.unlinkSync(newFilePath);
           } else {
             res.status(500).send('Error converting file');
           }
