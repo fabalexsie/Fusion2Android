@@ -8,6 +8,8 @@ import {
   Image,
   SimpleGrid,
   Text,
+  Title,
+  useMantineTheme,
 } from '@mantine/core';
 import { DropZoneModel } from './DropZoneModel';
 
@@ -21,6 +23,8 @@ export async function loader({ params }: { params: Params<string> }) {
 }
 
 export function ProjectPage() {
+  const theme = useMantineTheme();
+
   const { projectId, models } = useLoaderData() as {
     projectId: string;
     models: Model[];
@@ -29,8 +33,16 @@ export function ProjectPage() {
   return (
     <Container>
       <>
-        <h1>Project {models.length}</h1>
-        <SimpleGrid cols={3}>
+        <Title order={1} mb="md">
+          Project {models.length}
+        </Title>
+        <SimpleGrid
+          cols={3}
+          breakpoints={[
+            { maxWidth: theme.breakpoints.md, cols: 2 },
+            { maxWidth: theme.breakpoints.sm, cols: 1 },
+          ]}
+        >
           {models.map((model) => (
             <Card
               key={model.name}
@@ -40,18 +52,33 @@ export function ProjectPage() {
               withBorder
             >
               <CardSection>
-                <Image src={model.cover} alt={model.name} height={300} />
+                <Image src={model.cover} alt={model.name} height={150} />
               </CardSection>
               <Text mt="md">{model.name}</Text>
-              <Button
-                variant="light"
-                color="blue"
-                fullWidth
-                mt="md"
-                radius="md"
-              >
-                Open Model in 3D Viewer
-              </Button>
+              {model.link ? (
+                <Button
+                  href={`intent://arvr.google.com/scene-viewer/1.0?file=${window.location.origin}/${model.link}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`}
+                  component="a"
+                  variant="light"
+                  color="blue"
+                  fullWidth
+                  mt="md"
+                  radius="md"
+                >
+                  Open Model in 3D Viewer
+                </Button>
+              ) : (
+                <Button
+                  disabled
+                  variant="light"
+                  color="blue"
+                  fullWidth
+                  mt="md"
+                  radius="md"
+                >
+                  Open Model in 3D Viewer
+                </Button>
+              )}
             </Card>
           ))}
           <DropZoneModel projectId={projectId} />
