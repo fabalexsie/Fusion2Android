@@ -61,7 +61,7 @@ export function ProjectPage() {
               <Text mt="md">{model.name}</Text>
               {model.link ? (
                 <Button
-                  href={`intent://arvr.google.com/scene-viewer/1.0?file=${window.location.origin}/${model.link}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`}
+                  href={`intent://arvr.google.com/scene-viewer/1.0?file=${window.location.origin}${model.link}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`}
                   component="a"
                   variant="light"
                   color="blue"
