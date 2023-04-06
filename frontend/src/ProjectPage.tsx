@@ -15,8 +15,12 @@ import { DropZoneModel } from './DropZoneModel';
 
 export async function loader({ params }: { params: Params<string> }) {
   if (params.projectId !== undefined) {
-    const models = await api.getModels(params.projectId);
-    return { projectId: params.projectId, models };
+    try {
+      const models = await api.getModels(params.projectId);
+      return { projectId: params.projectId, models };
+    } catch (e) {
+      return { projectId: params.projectId, models: [] };
+    }
   } else {
     return { models: [] };
   }
