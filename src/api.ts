@@ -98,6 +98,8 @@ apiRouter.post('/proj/:project/upload', upload.single('model'), (req, res) => {
         (path.basename(req.file.originalname).endsWith('.usdz') ||
           path.basename(req.file.originalname).endsWith('.usd'))
       ) {
+        // Create folder for model (if it doesn't exist)
+        // and clear it of any old files
         const modelName = getModelName(req.file.originalname);
         const modelFolder = path.join(
           dataStorage,
@@ -107,9 +109,11 @@ apiRouter.post('/proj/:project/upload', upload.single('model'), (req, res) => {
         fs.mkdirSync(modelFolder, { recursive: true });
         clearFolder(modelFolder);
 
+        // add .usdz extension to file
         const newFilePath = `${req.file.path}.usdz`;
         fs.renameSync(req.file.path, newFilePath);
 
+        // run python converter
         let pyExec;
         if (process.env.IS_DEV === 'true') {
           pyExec = exec(
@@ -138,6 +142,7 @@ apiRouter.post('/proj/:project/upload', upload.single('model'), (req, res) => {
 
         pyExec.on('close', (code) => {
           if (code === 0) {
+            // conversion was successful
             res.send({ success: true });
             fs.unlinkSync(newFilePath);
           } else {
@@ -146,6 +151,7 @@ apiRouter.post('/proj/:project/upload', upload.single('model'), (req, res) => {
         });
       } else {
         res.status(400).send("File isn't a uds(z) file");
+        if (req.file) fs.unlinkSync(req.file.path);
       }
     } else {
       res.status(403).send("Password doesn't match");
