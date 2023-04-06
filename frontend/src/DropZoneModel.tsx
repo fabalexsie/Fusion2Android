@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dropzone } from '@mantine/dropzone';
 import { Center, Group, Text, TextInput, useMantineTheme } from '@mantine/core';
-import { IconLock, IconPlus, IconUpload } from '@tabler/icons-react';
+import { IconLock, IconPlus, IconUpload, IconX } from '@tabler/icons-react';
 import { px, rem } from '@mantine/styles';
 import { notifications } from '@mantine/notifications';
 import api from './apiService';
@@ -18,7 +18,7 @@ export function DropZoneModel({ projectId }: { projectId: string }) {
     for (const file of files) {
       if (file.name.endsWith('.usdz')) {
         api
-          .uploadModel(projectId, file)
+          .uploadModel(projectId, file, password)
           .then(() => {
             notifications.show({
               title: 'Success',
@@ -50,7 +50,23 @@ export function DropZoneModel({ projectId }: { projectId: string }) {
     event: React.KeyboardEvent<HTMLInputElement>
   ) => {
     if (event.key === 'Enter') {
-      setPassword((event.target as HTMLInputElement).value);
+      const password = (event.target as HTMLInputElement).value;
+      api.checkProjPw(projectId, password).then((result) => {
+        if (result) {
+          setPassword(password);
+          notifications.show({
+            title: 'Success',
+            message: 'Password correct',
+            color: 'green',
+          });
+        } else {
+          notifications.show({
+            title: 'Error',
+            message: 'Wrong password',
+            color: 'red',
+          });
+        }
+      });
     }
   };
 
@@ -114,6 +130,18 @@ export function DropZoneModel({ projectId }: { projectId: string }) {
                 </div>
               </Group>
             </Dropzone>
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                cursor: 'pointer',
+                color: theme.colors.gray[theme.colorScheme === 'dark' ? 4 : 6],
+              }}
+              onClick={() => setPassword('')}
+            >
+              <IconX></IconX>
+            </div>
           </Card.Section>
         )}
       </Card>

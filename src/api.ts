@@ -17,11 +17,11 @@ const dataStorage = path.join(path.dirname(__dirname), 'data', 'userFiles');
  *     - project1-uuid
  *       - model1-name
  *         - cover.png (#TODO)
- *         - model.udsz
+ *         - model.usdz
  *         - model.png
  *         - model.bin
  *       - model2-name
- *         - model.udsz
+ *         - model.usdz
  *         - model.png
  *         - model.bin
  *    - project2-uuid
@@ -69,19 +69,29 @@ apiRouter.get('/proj/:projectId/models', (req, res) => {
   res.send(modelList);
 });
 
+apiRouter.get('/proj/:projectId/checkPw', (req, res) => {
+  // check user pw in db
+  // return success or fail
+  const pw: string = req.query.pw as string;
+  checkProjectPw(req.params.projectId, pw).then((success) => {
+    res.send({ success: success });
+  });
+});
+
 /** needs ?pw=:pw parameter */
 apiRouter.post('/proj/:project/upload', upload.single('model'), (req, res) => {
   // check user pw in db
-  // put model udsz file in user folder inside model name folder
+  // put model usdz file in user folder inside model name folder
   // run python converter
   // ~ https://stackoverflow.com/a/44424950
   // return success or fail
-  checkProjectPw(req.params.project, req.params.pw).then((success) => {
+  const pw: string = req.query.pw as string;
+  checkProjectPw(req.params.project, pw).then((success) => {
     if (success) {
       if (
         req.file &&
-        (path.basename(req.file.originalname).endsWith('.udsz') ||
-          path.basename(req.file.originalname).endsWith('.uds'))
+        (path.basename(req.file.originalname).endsWith('.usdz') ||
+          path.basename(req.file.originalname).endsWith('.usd'))
       ) {
         const modelName = getModelName(req.file.originalname);
         const modelFolder = path.join(
@@ -127,7 +137,7 @@ function clearFolder(directory: string) {
 
 function getModelName(fileName: string): string {
   return path
-    .basename(fileName, '.udsz')
+    .basename(fileName, '.usdz')
     .replace(/\sv[0-9]+/g, '')
     .trim();
 }
