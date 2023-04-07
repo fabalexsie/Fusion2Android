@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkProjectPw, getNewProject } from './db';
+import { checkProjectPw, getNewProject, getProjectInfo } from './db';
 import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
@@ -16,7 +16,6 @@ const dataStorage = path.join(path.dirname(__dirname), 'data', 'userFiles');
  *   - userFiles
  *     - project1-uuid
  *       - model1-name
- *         - cover.png (#TODO)
  *         - model.usdz
  *         - model.png
  *         - model.bin
@@ -43,12 +42,18 @@ apiRouter.get('/', (req, res) => {
 });
 
 /**
- * Example response: {projectId: 2b4c5076-10c2-4598-9be6-85ffae68c7fe, pw: 590b2801-cc47-4c2d-9233-433891fb86db}
+ * Example response: {projectId: 319bcee5-1d1f-4fc3-aaa0-5102b2ae3b2a, pw: b6e2d59a-dfb9-4610-a2a7-a0ece202c23f}
  */
 apiRouter.get('/newProject', (req, res) => {
   const proj = getNewProject();
   fs.mkdirSync(path.join(dataStorage, proj.projectId), { recursive: true });
   res.send(proj);
+});
+
+apiRouter.get('/proj/:projectId/info', (req, res) => {
+  getProjectInfo(req.params.projectId).then((projInfo) => {
+    res.send(projInfo);
+  });
 });
 
 apiRouter.get('/proj/:projectId/models', (req, res) => {

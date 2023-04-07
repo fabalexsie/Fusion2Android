@@ -11,6 +11,7 @@ import {
 } from '@mantine/core';
 import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import { getLastOpenedProjects } from './localStorageUtil';
 
 const useStyles = createStyles((theme) => ({
   link: {
@@ -60,7 +61,7 @@ export function RootPage() {
 
   const [opened, setOpened] = useState(false);
 
-  const lastOpenedIds = ['2b4c5076-10c2-4598-9be6-85ffae68c7fe', '2'];
+  const lastOpenedProjects = getLastOpenedProjects();
 
   return (
     <AppShell
@@ -105,15 +106,15 @@ export function RootPage() {
             <Title order={4}>Last visited projects</Title>
           </Navbar.Section>
           <Navbar.Section grow mt="md">
-            {lastOpenedIds.map((projID, i) => (
+            {lastOpenedProjects.map((proj, i) => (
               <Link
-                key={projID}
-                to={`/${projID}`}
+                key={proj.projectId}
+                to={`/${proj.projectId}`}
                 className={cx(classes.link, {
-                  [classes.linkActive]: `/${projID}` === pathname,
+                  [classes.linkActive]: `/${proj.projectId}` === pathname,
                 })}
               >
-                Project {i + 1}
+                Project {proj.name}
               </Link>
             ))}
             {/* Links sections */}

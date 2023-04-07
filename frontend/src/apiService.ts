@@ -4,6 +4,11 @@ export type Model = {
   link: string;
 };
 
+export type ProjectInfo = {
+  projectId: string;
+  name: string;
+};
+
 function getModels(projectId: string): Promise<Model[]> {
   return fetch(`/api/proj/${projectId}/models`).then((res) => res.json());
 }
@@ -37,9 +42,14 @@ function checkProjPw(projectId: string, pw: string): Promise<boolean> {
     });
 }
 
+function getProjectInfo(projectId: string): Promise<ProjectInfo> {
+  return fetch(`/api/proj/${projectId}/info`).then((res) => res.json());
+}
+
 const exported = {
   getModels,
   uploadModel,
   checkProjPw,
+  getProjectInfo,
 };
 export default exported;
