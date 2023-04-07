@@ -4,12 +4,17 @@ import { RootPage } from './RootPage';
 import { ProjectPage, loader as projectLoader } from './ProjectPage';
 import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
+import { Welcome } from './Welcome';
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <RootPage></RootPage>,
     children: [
+      {
+        path: '',
+        element: <Welcome />,
+      },
       {
         path: ':projectId',
         element: <ProjectPage></ProjectPage>,

@@ -77,13 +77,19 @@ export function RootPage() {
                 mr="xl"
               />
             </MediaQuery>
-            <Image
-              src={'/favicon.svg'}
-              height={'34px'}
-              width={'34px'}
-              fit="contain"
-            />
-            <Title order={1}>usion2Android</Title>
+            <Link
+              to="/"
+              className="only-link-to"
+              style={{ display: 'flex', alignItems: 'center', height: '100%' }}
+            >
+              <Image
+                src={'/favicon.svg'}
+                height={'34px'}
+                width={'34px'}
+                fit="contain"
+              />
+              <Title order={1}>usion2Android</Title>
+            </Link>
           </div>
         </Header>
       }
