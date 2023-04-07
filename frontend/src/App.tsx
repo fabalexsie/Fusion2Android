@@ -1,10 +1,10 @@
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import './App.css';
-import { RootPage } from './RootPage';
-import { ProjectPage, loader as projectLoader } from './ProjectPage';
+import { RootPage } from './pages/RootPage';
+import { ProjectPage, loader as projectLoader } from './pages/ProjectPage';
 import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
-import { Welcome } from './Welcome';
+import { Welcome } from './pages/Welcome';
 
 const router = createBrowserRouter([
   {

@@ -11,7 +11,7 @@ import {
 } from '@mantine/core';
 import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { getLastOpenedProjects } from './localStorageUtil';
+import { getLastOpenedProjects } from '../util/localStorageUtil';
 
 const useStyles = createStyles((theme) => ({
   link: {

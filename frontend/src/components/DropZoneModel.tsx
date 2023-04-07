@@ -4,7 +4,7 @@ import { Center, Group, Text, TextInput, useMantineTheme } from '@mantine/core';
 import { IconLock, IconPlus, IconUpload, IconX } from '@tabler/icons-react';
 import { px, rem } from '@mantine/styles';
 import { notifications } from '@mantine/notifications';
-import api from './apiService';
+import api from '../util/apiService';
 import { Card } from '@mantine/core';
 
 export function DropZoneModel({ projectId }: { projectId: string }) {

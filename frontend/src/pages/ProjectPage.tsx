@@ -1,5 +1,5 @@
 import { Params, useLoaderData } from 'react-router-dom';
-import api, { Model, ProjectInfo } from './apiService';
+import api, { Model, ProjectInfo } from '../util/apiService';
 import {
   Button,
   Card,
@@ -10,9 +10,9 @@ import {
   Title,
   useMantineTheme,
 } from '@mantine/core';
-import { DropZoneModel } from './DropZoneModel';
-import { GLTFViewer } from './GLTFViewer';
-import { saveLastOpenedProject } from './localStorageUtil';
+import { DropZoneModel } from '../components/DropZoneModel';
+import { GLTFViewer } from '../components/GLTFViewer';
+import { saveLastOpenedProject } from '../util/localStorageUtil';
 import { notifications } from '@mantine/notifications';
 
 export async function loader({ params }: { params: Params<string> }) {

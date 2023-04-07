@@ -45,6 +45,9 @@ apiRouter.get('/', (req, res) => {
  * Example response: {projectId: 319bcee5-1d1f-4fc3-aaa0-5102b2ae3b2a, pw: b6e2d59a-dfb9-4610-a2a7-a0ece202c23f}
  */
 apiRouter.get('/newProject', (req, res) => {
+  //res.sendStatus(403);
+  // TODO add pw check
+
   const proj = getNewProject();
   fs.mkdirSync(path.join(dataStorage, proj.projectId), { recursive: true });
   res.send(proj);
