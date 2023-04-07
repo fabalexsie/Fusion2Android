@@ -30,6 +30,9 @@ const useStyles = createStyles((theme) => ({
     fontWeight: 500,
     height: rem(44),
     lineHeight: rem(44),
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
 
     '&:hover': {
       backgroundColor:
