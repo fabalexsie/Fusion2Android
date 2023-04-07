@@ -1,10 +1,11 @@
-import { Params, useLoaderData } from 'react-router-dom';
+import { Params, useFetcher, useLoaderData } from 'react-router-dom';
 import api, { Model, ProjectInfo } from '../util/apiService';
 import {
   Button,
   Card,
   CardSection,
   Container,
+  Input,
   SimpleGrid,
   Text,
   Title,
@@ -14,6 +15,8 @@ import { DropZoneModel } from '../components/DropZoneModel';
 import { GLTFViewer } from '../components/GLTFViewer';
 import { saveLastOpenedProject } from '../util/localStorageUtil';
 import { notifications } from '@mantine/notifications';
+import { IconCheck, IconEdit } from '@tabler/icons-react';
+import { useState } from 'react';
 
 export async function loader({ params }: { params: Params<string> }) {
   if (params.projectId !== undefined) {
@@ -48,12 +51,48 @@ export async function loader({ params }: { params: Params<string> }) {
   }
 }
 
+export async function action({
+  params,
+  request,
+}: {
+  params: Params<string>;
+  request: Request;
+}) {
+  const formData = await request.formData();
+  await api.updateProjectInfo(JSON.parse(formData.get('body') as string));
+  return { success: true };
+}
+
 export function ProjectPage() {
   const theme = useMantineTheme();
-
   const { projectInfo, models } = useLoaderData() as {
     projectInfo: ProjectInfo;
     models: Model[];
+  };
+
+  const [projectInfoEditable, setProjectInfoEditable] = useState(false);
+  const [editedProjectName, setEditedProjectName] = useState(projectInfo.name);
+  const fetcher = useFetcher();
+
+  const handleProjectNameSave = async () => {
+    try {
+      fetcher.submit(
+        {
+          body: JSON.stringify({
+            ...projectInfo,
+            name: editedProjectName,
+          }),
+        },
+        { method: 'POST', action: `/${projectInfo.projectId}` }
+      );
+      setProjectInfoEditable(false);
+    } catch (e) {
+      notifications.show({
+        title: 'Error',
+        message: 'Could not update project name',
+        color: 'red',
+      });
+    }
   };
 
   if (!projectInfo || !projectInfo.projectId) {
@@ -68,8 +107,35 @@ export function ProjectPage() {
     return (
       <Container>
         <>
-          <Title order={1} mb="md">
-            Project {projectInfo.name}
+          <Title
+            order={1}
+            mb="md"
+            style={{ display: 'flex', alignItems: 'center' }}
+          >
+            Project{' '}
+            {projectInfoEditable ? (
+              <>
+                <Input
+                  style={{
+                    display: 'flex',
+                    flexGrow: 1,
+                  }}
+                  mx="md"
+                  value={editedProjectName}
+                  onChange={(ev) => {
+                    setEditedProjectName(ev.currentTarget.value);
+                  }}
+                />
+                <IconCheck onClick={handleProjectNameSave} />
+              </>
+            ) : (
+              <>
+                <Text span mx="md">
+                  {projectInfo.name}
+                </Text>
+                <IconEdit onClick={() => setProjectInfoEditable((b) => !b)} />
+              </>
+            )}
           </Title>
           <SimpleGrid
             cols={3}

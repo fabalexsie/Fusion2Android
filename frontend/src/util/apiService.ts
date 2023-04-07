@@ -46,10 +46,24 @@ function getProjectInfo(projectId: string): Promise<ProjectInfo> {
   return fetch(`/api/proj/${projectId}/info`).then((res) => res.json());
 }
 
+function updateProjectInfo(projectInfo: ProjectInfo): Promise<ProjectInfo> {
+  return fetch(`/api/proj/${projectInfo.projectId}/info`, {
+    method: 'POST',
+    body: JSON.stringify({
+      projectId: projectInfo.projectId,
+      name: projectInfo.name,
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  }).then((res) => res.json());
+}
+
 const exported = {
   getModels,
   uploadModel,
   checkProjPw,
   getProjectInfo,
+  updateProjectInfo,
 };
 export default exported;

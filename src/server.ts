@@ -11,6 +11,8 @@ app.use(express.static('frontend/build'));
 
 app.use('/models', express.static('data/userFiles'));
 
+app.use(express.json());
+
 app.use('/api', apiRouter);
 
 // nothing else matches, so send index.html (react router will handle the rest)

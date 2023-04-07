@@ -1,7 +1,11 @@
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import './App.css';
 import { RootPage } from './pages/RootPage';
-import { ProjectPage, loader as projectLoader } from './pages/ProjectPage';
+import {
+  ProjectPage,
+  loader as projectLoader,
+  action as projectAction,
+} from './pages/ProjectPage';
 import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { Welcome } from './pages/Welcome';
@@ -19,6 +23,7 @@ const router = createBrowserRouter([
         path: ':projectId',
         element: <ProjectPage></ProjectPage>,
         loader: projectLoader,
+        action: projectAction,
       },
     ],
   },

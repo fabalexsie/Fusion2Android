@@ -50,6 +50,15 @@ export function getProjectInfo(projectId: string): Promise<ProjectInfo> {
   });
 }
 
+export function updateProjectInfo(projectInfo: ProjectInfo): Promise<boolean> {
+  return new Promise((resolve) => {
+    const stmt = db.prepare('UPDATE projects SET name = ? WHERE projectId = ?');
+    stmt.run([projectInfo.name, projectInfo.projectId]);
+    stmt.finalize();
+    resolve(true);
+  });
+}
+
 export function checkProjectPw(
   projectId: string,
   pw: string

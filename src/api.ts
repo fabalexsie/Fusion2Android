@@ -1,5 +1,10 @@
 import express from 'express';
-import { checkProjectPw, getNewProject, getProjectInfo } from './db';
+import {
+  checkProjectPw,
+  getNewProject,
+  getProjectInfo,
+  updateProjectInfo,
+} from './db';
 import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
@@ -56,6 +61,18 @@ apiRouter.get('/newProject', (req, res) => {
 apiRouter.get('/proj/:projectId/info', (req, res) => {
   getProjectInfo(req.params.projectId).then((projInfo) => {
     res.send(projInfo);
+  });
+});
+apiRouter.post('/proj/:projectId/info', (req, res) => {
+  const projInfo = req.body;
+  getProjectInfo(req.params.projectId).then((oldProjInfo) => {
+    const newProjInfo = {
+      ...oldProjInfo,
+      ...projInfo,
+    };
+    updateProjectInfo(newProjInfo).then(() => {
+      res.send(newProjInfo);
+    });
   });
 });
 
