@@ -5,13 +5,13 @@ import {
   Card,
   CardSection,
   Container,
-  Image,
   SimpleGrid,
   Text,
   Title,
   useMantineTheme,
 } from '@mantine/core';
 import { DropZoneModel } from './DropZoneModel';
+import { GLTFViewer } from './GLTFViewer';
 
 export async function loader({ params }: { params: Params<string> }) {
   if (params.projectId !== undefined) {
@@ -56,7 +56,7 @@ export function ProjectPage() {
               withBorder
             >
               <CardSection>
-                <Image src={model.cover} alt={model.name} height={150} />
+                <GLTFViewer modelLink={model.link} height={150} />
               </CardSection>
               <Text mt="md">{model.name}</Text>
               {model.link ? (
