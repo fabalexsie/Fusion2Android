@@ -1,4 +1,4 @@
-import { Navbar, Title, createStyles, rem } from '@mantine/core';
+import { Divider, Navbar, Title, createStyles, rem } from '@mantine/core';
 import { Link, useLocation } from 'react-router-dom';
 import { getLastOpenedProjects } from '../util/localStorageUtil';
 
@@ -45,6 +45,30 @@ const useStyles = createStyles((theme) => ({
       color: theme.white,
     },
   },
+
+  newProjLink: {
+    boxSizing: 'border-box',
+    display: 'block',
+    textDecoration: 'none',
+    borderRadius: theme.radius.md,
+    color:
+      theme.colorScheme === 'dark'
+        ? theme.colors.dark[0]
+        : theme.colors.gray[7],
+    backgroundColor:
+      theme.colorScheme === 'dark'
+        ? theme.colors.gray[7]
+        : theme.colors.gray[4],
+    padding: `0 ${theme.spacing.md}`,
+    fontSize: theme.fontSizes.sm,
+    marginRight: theme.spacing.md,
+    fontWeight: 500,
+    height: rem(44),
+    lineHeight: rem(44),
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
 }));
 
 export function NavMenu({ opened }: { opened: boolean }) {
@@ -76,6 +100,12 @@ export function NavMenu({ opened }: { opened: boolean }) {
           </Link>
         ))}
         {/* Links sections */}
+      </Navbar.Section>
+      <Divider />
+      <Navbar.Section mt="md">
+        <Link to={`/newProject`} className={classes.newProjLink}>
+          Create new project
+        </Link>
       </Navbar.Section>
       <Navbar.Section>{/* Footer with user */}</Navbar.Section>
     </Navbar>

@@ -6,6 +6,7 @@ services:
     environment:
       - PORT=8090
       - IS_DEV=false
+      - ADMIN_PW=SuperSecretPassword
     ports:
       - 8090:8090
     volumes:

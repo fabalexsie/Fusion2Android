@@ -10,6 +10,12 @@ export type Project = {
   pw?: string;
 };
 
+export function createProject(adminPassword: string): Promise<Project> {
+  return fetch(`/api/newProject?pw=${adminPassword}`).then((response) =>
+    response.json()
+  );
+}
+
 function getModels(projectId: string): Promise<Model[]> {
   return fetch(`/api/proj/${projectId}/models`).then((res) => res.json());
 }
@@ -60,11 +66,12 @@ function updateProjectInfo(projectInfo: Project): Promise<Project> {
   }).then((res) => res.json());
 }
 
-const exported = {
+const api = {
+  createProject,
   getModels,
   uploadModel,
   checkProjPw,
   getProjectInfo,
   updateProjectInfo,
 };
-export default exported;
+export default api;

@@ -9,6 +9,7 @@ import {
 import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { Welcome } from './pages/Welcome';
+import { NewProject } from './pages/NewProject';
 
 const router = createBrowserRouter([
   {
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
         element: <ProjectPage></ProjectPage>,
         loader: projectLoader,
         action: projectAction,
+      },
+      {
+        path: 'newProject',
+        element: <NewProject />,
       },
     ],
   },
