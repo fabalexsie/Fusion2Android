@@ -1,5 +1,5 @@
 import { Params, useFetcher, useLoaderData } from 'react-router-dom';
-import api, { Model, ProjectInfo } from '../util/apiService';
+import api, { Model, Project } from '../util/apiService';
 import {
   Button,
   Card,
@@ -13,18 +13,23 @@ import {
 } from '@mantine/core';
 import { DropZoneModel } from '../components/DropZoneModel';
 import { GLTFViewer } from '../components/GLTFViewer';
-import { saveLastOpenedProject } from '../util/localStorageUtil';
+import {
+  getProjectFromLastOpenedProjects,
+  saveLastOpenedProject,
+} from '../util/localStorageUtil';
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconEdit } from '@tabler/icons-react';
 import { useState } from 'react';
 
 export async function loader({ params }: { params: Params<string> }) {
   if (params.projectId !== undefined) {
-    let projectInfo: ProjectInfo | undefined;
+    let project: Project | undefined = getProjectFromLastOpenedProjects(
+      params.projectId
+    );
     try {
-      projectInfo = await api.getProjectInfo(params.projectId);
-      if (projectInfo && projectInfo.projectId) {
-        saveLastOpenedProject(projectInfo);
+      project = { ...project, ...(await api.getProjectInfo(params.projectId)) };
+      if (project && project.projectId) {
+        saveLastOpenedProject(project);
       }
     } catch (e) {
       notifications.show({
@@ -45,7 +50,7 @@ export async function loader({ params }: { params: Params<string> }) {
       });
     }
 
-    return { projectInfo, models };
+    return { project: project, models };
   } else {
     return { projectInfo: null, models: [] };
   }
@@ -65,13 +70,17 @@ export async function action({
 
 export function ProjectPage() {
   const theme = useMantineTheme();
-  const { projectInfo, models } = useLoaderData() as {
-    projectInfo: ProjectInfo;
+  const { project, models } = useLoaderData() as {
+    project: Project;
     models: Model[];
   };
 
+  const reloadData = () => {
+    window.location.reload();
+  };
+
   const [projectInfoEditable, setProjectInfoEditable] = useState(false);
-  const [editedProjectName, setEditedProjectName] = useState(projectInfo.name);
+  const [editedProjectName, setEditedProjectName] = useState(project.name);
   const fetcher = useFetcher();
 
   const handleProjectNameSave = async () => {
@@ -79,11 +88,11 @@ export function ProjectPage() {
       fetcher.submit(
         {
           body: JSON.stringify({
-            ...projectInfo,
+            ...project,
             name: editedProjectName,
           }),
         },
-        { method: 'POST', action: `/${projectInfo.projectId}` }
+        { method: 'POST', action: `/${project.projectId}` }
       );
       setProjectInfoEditable(false);
     } catch (e) {
@@ -95,7 +104,7 @@ export function ProjectPage() {
     }
   };
 
-  if (!projectInfo || !projectInfo.projectId) {
+  if (!project || !project.projectId) {
     return (
       <Container>
         <Title order={1} mb="md">
@@ -131,7 +140,7 @@ export function ProjectPage() {
             ) : (
               <>
                 <Text span mx="md">
-                  {projectInfo.name}
+                  {project.name}
                 </Text>
                 <IconEdit onClick={() => setProjectInfoEditable((b) => !b)} />
               </>
@@ -182,7 +191,10 @@ export function ProjectPage() {
                 )}
               </Card>
             ))}
-            <DropZoneModel projectId={projectInfo.projectId} />
+            <DropZoneModel
+              projectId={project.projectId}
+              reloadData={reloadData}
+            />
           </SimpleGrid>
         </>
       </Container>

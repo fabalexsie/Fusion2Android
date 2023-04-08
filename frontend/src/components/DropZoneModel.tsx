@@ -6,11 +6,25 @@ import { px, rem } from '@mantine/styles';
 import { notifications } from '@mantine/notifications';
 import api from '../util/apiService';
 import { Card } from '@mantine/core';
+import {
+  getProjectFromLastOpenedProjects,
+  setPasswordToLastOpenedProject,
+} from '../util/localStorageUtil';
 
-export function DropZoneModel({ projectId }: { projectId: string }) {
+export function DropZoneModel({
+  projectId,
+  reloadData,
+}: {
+  projectId: string;
+  reloadData: () => void;
+}) {
   const theme = useMantineTheme();
+  const lastOpenedProject = getProjectFromLastOpenedProjects(projectId);
   const [loading, setLoading] = React.useState(false);
   const [password, setPassword] = React.useState('');
+  const [correctPassword, setCorrectPassword] = React.useState(
+    lastOpenedProject.pw || ''
+  );
 
   const handleUpload = async (files: File[]) => {
     setLoading(true);
@@ -18,7 +32,7 @@ export function DropZoneModel({ projectId }: { projectId: string }) {
     for (const file of files) {
       if (file.name.endsWith('.usdz')) {
         api
-          .uploadModel(projectId, file, password)
+          .uploadModel(projectId, file, correctPassword)
           .then(() => {
             notifications.show({
               title: 'Success',
@@ -26,6 +40,7 @@ export function DropZoneModel({ projectId }: { projectId: string }) {
               color: 'green',
             });
             setLoading(false);
+            reloadData();
           })
           .catch((error) => {
             notifications.show({
@@ -50,10 +65,10 @@ export function DropZoneModel({ projectId }: { projectId: string }) {
     event: React.KeyboardEvent<HTMLInputElement>
   ) => {
     if (event.key === 'Enter') {
-      const password = (event.target as HTMLInputElement).value;
       api.checkProjPw(projectId, password).then((result) => {
         if (result) {
-          setPassword(password);
+          setCorrectPassword(password);
+          setPasswordToLastOpenedProject(projectId, password);
           notifications.show({
             title: 'Success',
             message: 'Password correct',
@@ -70,10 +85,15 @@ export function DropZoneModel({ projectId }: { projectId: string }) {
     }
   };
 
+  const handleRemovePassword = () => {
+    setCorrectPassword('');
+    setPasswordToLastOpenedProject(projectId, '');
+  };
+
   return (
     <>
-      <Card padding="lg" radius="md" withBorder={password.length === 0}>
-        {password.length === 0 && (
+      <Card padding="lg" radius="md" withBorder={correctPassword.length === 0}>
+        {correctPassword.length === 0 && (
           <>
             <Center>
               <IconLock
@@ -93,11 +113,13 @@ export function DropZoneModel({ projectId }: { projectId: string }) {
               label="Password"
               mt="md"
               type="password"
+              value={password}
+              onChange={(event) => setPassword(event.currentTarget.value)}
               onKeyDown={handlePasswortKeyDown}
             />
           </>
         )}
-        {password.length > 0 && (
+        {correctPassword.length > 0 && (
           <Card.Section>
             <Dropzone onDrop={(files) => handleUpload(files)} loading={loading}>
               <Group
@@ -138,7 +160,7 @@ export function DropZoneModel({ projectId }: { projectId: string }) {
                 cursor: 'pointer',
                 color: theme.colors.gray[theme.colorScheme === 'dark' ? 4 : 6],
               }}
-              onClick={() => setPassword('')}
+              onClick={handleRemovePassword}
             >
               <IconX></IconX>
             </div>

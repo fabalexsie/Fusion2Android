@@ -4,9 +4,10 @@ export type Model = {
   link: string;
 };
 
-export type ProjectInfo = {
+export type Project = {
   projectId: string;
   name: string;
+  pw?: string;
 };
 
 function getModels(projectId: string): Promise<Model[]> {
@@ -42,11 +43,11 @@ function checkProjPw(projectId: string, pw: string): Promise<boolean> {
     });
 }
 
-function getProjectInfo(projectId: string): Promise<ProjectInfo> {
+function getProjectInfo(projectId: string): Promise<Project> {
   return fetch(`/api/proj/${projectId}/info`).then((res) => res.json());
 }
 
-function updateProjectInfo(projectInfo: ProjectInfo): Promise<ProjectInfo> {
+function updateProjectInfo(projectInfo: Project): Promise<Project> {
   return fetch(`/api/proj/${projectInfo.projectId}/info`, {
     method: 'POST',
     body: JSON.stringify({
