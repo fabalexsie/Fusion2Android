@@ -1,7 +1,14 @@
 import React from 'react';
 import { Dropzone } from '@mantine/dropzone';
-import { Center, Group, Text, TextInput, useMantineTheme } from '@mantine/core';
-import { IconLock, IconPlus, IconUpload, IconX } from '@tabler/icons-react';
+import {
+  ActionIcon,
+  Center,
+  Group,
+  Text,
+  TextInput,
+  useMantineTheme,
+} from '@mantine/core';
+import { IconLock, IconPlus, IconUpload } from '@tabler/icons-react';
 import { px, rem } from '@mantine/styles';
 import { notifications } from '@mantine/notifications';
 import api from '../util/apiService';
@@ -86,6 +93,7 @@ export function DropZoneModel({
   };
 
   const handleRemovePassword = () => {
+    setPassword('');
     setCorrectPassword('');
     setPasswordToLastOpenedProject(projectId, '');
   };
@@ -152,18 +160,18 @@ export function DropZoneModel({
                 </div>
               </Group>
             </Dropzone>
-            <div
+            <ActionIcon
+              m="xs"
+              variant="filled"
               style={{
                 position: 'absolute',
                 top: 0,
                 right: 0,
-                cursor: 'pointer',
-                color: theme.colors.gray[theme.colorScheme === 'dark' ? 4 : 6],
               }}
               onClick={handleRemovePassword}
             >
-              <IconX></IconX>
-            </div>
+              <IconLock />
+            </ActionIcon>
           </Card.Section>
         )}
       </Card>
