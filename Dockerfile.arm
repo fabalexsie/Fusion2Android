@@ -1,0 +1,87 @@
+FROM quay.io/pypa/manylinux2014_aarch64:2021-06-07-00faba2 as usd-core-wheel-builder
+
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+
+WORKDIR /opt/USD
+
+RUN git clone https://github.com/PixarAnimationStudios/USD .
+
+# XXX:
+# The above manylinux2014 image contains CMake 3.20, but we require
+# 3.24+ for Python 3.10 support. Newer images include later cmake
+# versions but for some reason (possibly the use of gcc 10?) wheels
+# created from these images crash in TBB. So for now, we use this
+# older image but install a newer CMake.
+RUN pipx install --force cmake==3.24.3
+
+
+### MY CHANGES FS
+ARG PY_INTERPRETER=/opt/python/cp39-cp39/bin/python
+
+# Building USD
+RUN $PY_INTERPRETER -c "import pathlib,sysconfig; pathlib.Path(sysconfig.get_config_var('LIBDIR'), sysconfig.get_config_var('LDLIBRARY')).touch()"
+RUN $PY_INTERPRETER build_scripts/build_usd.py --build-args USD,"-DPXR_PY_UNDEFINED_DYNAMIC_LOOKUP=ON -DPXR_BUILD_USD_TOOLS=OFF -DPXR_INSTALL_LOCATION=../pxr/pluginfo" --no-imaging --no-examples --no-tutorials --build /opt/USD/gen/build --src /opt/USD/gen/src /opt/USD/inst -v
+
+# Creating packaging directory
+RUN mkdir ./packaging
+RUN cp -R /opt/USD/inst ./packaging
+RUN cp build_scripts/pypi/package_files/* ./packaging
+RUN cp LICENSE.txt ./packaging
+
+# Running setup.py
+WORKDIR /opt/USD/packaging
+RUN $PY_INTERPRETER setup.py bdist_wheel --python-tag cp39
+
+# Running auditwheel repair (moves .so files into package)
+WORKDIR /opt/USD/
+ENV PYTHONPATH=/opt/USD/packaging/pypi/lib/python
+ENV LD_LIBRARY_PATH=/opt/USD/packaging/pypi/lib:$LD_LIBRARY_PATH
+RUN auditwheel repair packaging/dist/*.whl
+
+# Updating pluginfo paths
+RUN mkdir /opt/USD-dist/
+RUN WHEEL_PACKAGE_NAME=$(ls wheelhouse) && $PY_INTERPRETER build_scripts/pypi/updatePluginfos.py "wheelhouse/$WHEEL_PACKAGE_NAME" "/opt/USD-dist/$WHEEL_PACKAGE_NAME"
+
+#WORKDIR /opt/USD-dist
+
+#########################################################
+
+
+FROM node:18.14.2
+
+COPY --from=usd-core-wheel-builder /opt/USD-dist /wheel
+
+# INSTALL PYTHON DEPENDENCIES
+RUN apt-get update && apt-get install python3 python3-pip -y
+#RUN pip3 install -r python/requirements.txt
+RUN pip3 install /wheel/$(ls /wheel)
+RUN pip3 install usd2gltf
+RUN pip3 install pygltflib
+
+# INSTALL NPM DEPENDENCIES
+WORKDIR /app/frontend
+COPY frontend/package.json frontend/package-lock.json frontend/tsconfig.json ./
+RUN npm install
+
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm install
+RUN npm install ts-node
+
+# BUILD FRONTEND
+WORKDIR /app/frontend
+COPY frontend/public ./public
+COPY frontend/src ./src
+RUN npm run build
+
+
+# COPY SRC FILES SERVER
+WORKDIR /app
+COPY src ./src
+COPY scripts ./scripts
+
+# COPY PYTHON FILES
+COPY python ./python
+
+ENTRYPOINT ["npm", "run" ,"production"]
