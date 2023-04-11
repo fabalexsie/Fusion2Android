@@ -35,4 +35,3 @@ dependencies:
       - usd-core==23.2
       - usd2gltf==0.3.5
       - wrapt==1.15.0
-prefix: C:\Users\Fabian\miniconda3\envs\usdz

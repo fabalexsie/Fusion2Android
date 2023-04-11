@@ -2,12 +2,13 @@ version: '3.8'
 
 services:
   app:
-    build: ./
+    build:
+      context: ./
+      dockerfile: ./Dockerfile # change this to ./Dockerfile.arm if you're running on an ARM device
     environment:
-      - PORT=8090
-      - IS_DEV=false
-      - ADMIN_PW=SuperSecretPassword
+      - PORT=8090 # selected port should be the same which will be mapped to the host
+      - ADMIN_PW=SuperSecretPassword # !!! CHANGE IT !!!
     ports:
-      - 8090:8090
+      - 8080:8090 # A:B | A: on which port the app should be available on the host ; B: same port as defined in the PORT environment variable
     volumes:
       - ./data:/app/data

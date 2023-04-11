@@ -31,4 +31,7 @@ COPY scripts ./scripts
 # COPY PYTHON FILES
 COPY python ./python
 
+# deactivate the usage of the conda environment
+ENV IS_DEV=false
+
 ENTRYPOINT ["npm", "run" ,"production"]
