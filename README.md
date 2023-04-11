@@ -19,13 +19,9 @@ This project aims to solve this problem. It provides a python script that can be
 
 It also has the nice feature that you can directly share the link to your project/collection of models with others, so they can easily view your models in AR, too.
 
----
-
 ## Screenshot
 
 [![Screenshot of a project view of the web application](res/screenshot_project_view.png)](res/screenshot_project_view.png)
-
----
 
 ## Features
 
@@ -35,8 +31,6 @@ It also has the nice feature that you can directly share the link to your projec
 - Web app can be run as a docker container
 - You need an admin password to create a new project page
 - Each project has a generated password, which must be provided to upload new models
-
----
 
 ## Run it yourself
 
@@ -120,8 +114,6 @@ Folder structure the data folder will have:
    \--db.sqlite
 ```
 
---
-
 ## Contributing
 
 If you have any questions or suggestions, feel free to open an issue.
@@ -131,26 +123,22 @@ If you want to contribute to this project, please open a pull request. I appreci
 
 Would be nice if you could mention me ([fabalexsie](https://github.com/fabalexsie/)), if you use this project or parts of it. I will be happy to see what you created with it. (When you leave me a message to your project, I may reference it here.)
 
-<details>
-<summary>
-<h2 style="display: inline-block;">Challenges while developing / Creation process</h2>
-</summary>
-<h3>Scale factor</h3>
+## Challenges while developing / Creation process
+
+### Scale factor
 
 Thanks to the python project [usd2gltf](https://pypi.org/project/usd2gltf/) from [mikelyndon](https://github.com/mikelyndon), the first conversion was quite easy. Then I created the link according to the documentation from google to provide the gltf file as an intent for the Scene Viewer. This worked out pretty good.
 
 Then I wanted to see the model in AR, but it was huge. The problem was, that Fusion 360 exported my model in mm but the scene viewer interpreted each unit as 1m. So I had to scale the model down by a factor of 1000. So I adapted my python script to scale the usd scene down by factor 1000 and then convert it to gltf.
 
-<h3>Scaling of usd file format</h3>
+### Scaling of usd file format
 
 Next problem occured: Some parts of the usd scene encoded in the file format as matrix transformation instead of translation, rotation and scale. This caused the scaling to not work properly for these parts. So I had to adapt the python script to convert the matrix transformation to translation, rotation and scale.
 
 (Of course i also tried converting the exported gltf file, but this lead to a similar problem, that some components were not scaled.)
 
-<h3>Running inside a docker container (on aarch64 instead of x86_64)</h3>
+### Running inside a docker container (on aarch64 instead of x86_64)
 
 Wrapping the python script inside a web application was done straightforward with the help of my [WebAppStarterTemplate](https://github.com/fabalexsie/WebAppStarterTemplate). Then I tested it inside docker to later upload it to a server. Everything was running perfect.
 
 So I pushed the code to the server and build the docker image. But it failed with the error that the python package `usd-core` (a dependency from usd2gltf) was not found for this platform. Long story short: I compiled and installed the package from source inside the docker container on aarch64 and then it worked. (Thanks to [instantapfel](https://github.com/instantapfel/) for his help with this part.)
-
-</details>
