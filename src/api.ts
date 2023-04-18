@@ -79,22 +79,30 @@ apiRouter.get('/proj/:projectId/models', (req, res) => {
   // check user folder for model names
   // return list of model names (for google link)
   const projFolder = path.join(dataStorage, req.params.projectId);
-  const modelList = fs.readdirSync(projFolder).map((folderName) => {
-    let link = '';
-    try {
-      const starterFile = fs
-        .readdirSync(path.join(projFolder, folderName))
-        .filter((file) => path.extname(file) === '.gltf')[0];
-      link = `/models/${req.params.projectId}/${folderName}/${starterFile}`;
-    } catch (e) {
-      console.error(`starter file doesn't exist for ${folderName}`);
-    }
-    return {
-      name: folderName,
-      cover: `/models/${req.params.projectId}/${folderName}/cover.png`,
-      link: link,
-    };
-  });
+  const modelList = fs
+    .readdirSync(projFolder)
+    .map((folderName) => {
+      let link = '';
+      let time = 0;
+      try {
+        const starterFile = fs
+          .readdirSync(path.join(projFolder, folderName))
+          .filter((file) => path.extname(file) === '.gltf')[0];
+        link = `/models/${req.params.projectId}/${folderName}/${starterFile}`;
+        time = fs
+          .statSync(path.join(projFolder, folderName, starterFile))
+          .mtime.getTime();
+      } catch (e) {
+        console.error(`starter file doesn't exist for ${folderName}`);
+      }
+      return {
+        name: folderName,
+        cover: `/models/${req.params.projectId}/${folderName}/cover.png`,
+        link: link,
+        time: time,
+      };
+    })
+    .sort((a, b) => b.time - a.time);
   res.send(modelList);
 });
 
