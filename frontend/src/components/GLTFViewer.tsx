@@ -4,7 +4,8 @@ import { useRef, useMemo } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { Progress } from './Progress';
-import { Box, Group } from '@mantine/core';
+import { Alert, Box, Group, Text } from '@mantine/core';
+import { IconAlertCircle } from '@tabler/icons-react';
 
 export function GLTFViewer({
   modelLink,
@@ -121,11 +122,21 @@ export function GLTFViewer({
     // cube.position.set(0, 0.5, 0);
     // _scene.add(cube);
 
-    const _renderer = new THREE.WebGLRenderer({ alpha: true });
-    _renderer.setSize(viewWidth, viewHeight);
-    _scene.background = new THREE.Color(0xffffff);
-    _renderer.setClearColor(0xffffff, 1);
-    return [_renderer, _scene, _camera];
+    try {
+      const _renderer = new THREE.WebGLRenderer({ alpha: true });
+      _renderer.setSize(viewWidth, viewHeight);
+      _scene.background = new THREE.Color(0xffffff);
+      _renderer.setClearColor(0xffffff, 1);
+      return [_renderer, _scene, _camera];
+    } catch (e) {
+      notifications.show({
+        id: 'renderer-error',
+        title: 'Error',
+        message: `${e}`,
+        color: 'red',
+      });
+      return [null, null, null];
+    }
   }, [modelLink, viewWidth, viewHeight]);
 
   useEffect(() => {
@@ -154,6 +165,16 @@ export function GLTFViewer({
     <Box pos="relative">
       <Group pos="relative" top={0} left={0} right={0} bottom={0}>
         <div ref={containerRef} style={{ height: height, width: '100%' }}></div>
+        {!renderer && loadingProgress >= 100 && (
+          <Alert
+            icon={<IconAlertCircle size="1rem" />}
+            color="red"
+            radius="md"
+            style={{ margin: 'auto' }}
+          >
+            3D-Renderer could not be loaded
+          </Alert>
+        )}
       </Group>
       <Group
         pos="absolute"
