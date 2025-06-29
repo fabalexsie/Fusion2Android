@@ -1,5 +1,7 @@
 FROM quay.io/pypa/manylinux2014_aarch64:2021-06-07-00faba2 as base
 
+RUN yum install -y libXt-devel
+
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 
