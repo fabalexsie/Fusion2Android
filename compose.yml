@@ -1,0 +1,10 @@
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile.arm
+    environment:
+      - PORT=80
+      - IS_DEV=false
+    volumes:
+      - ./data:/app/data
