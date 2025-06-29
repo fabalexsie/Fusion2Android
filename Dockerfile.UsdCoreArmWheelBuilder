@@ -5,8 +5,7 @@ ENV LANGUAGE en_US:en
 
 WORKDIR /opt/USD
 
-RUN git clone https://github.com/PixarAnimationStudios/USD .
-RUN git reset --hard 17360ab530c1d0e721edf7d35aa0feb3f9a8ecaf
+RUN git clone --depth 1 --branch v23.05 https://github.com/PixarAnimationStudios/USD .
 
 # XXX:
 # The above manylinux2014 image contains CMake 3.20, but we require
