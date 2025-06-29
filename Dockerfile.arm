@@ -1,13 +1,4 @@
-FROM quay.io/pypa/manylinux2014_aarch64:2021-06-07-00faba2 as usd-core-wheel-builder
-
-# Fix old CentOS repositories
-# This is necessary because the manylinux2014 image uses an old CentOS version
-RUN repo_file=/etc/yum.repos.d/CentOS-Base.repo
-RUN cp ${repo_file} ~/CentOS-Base.repo.backup
-RUN sudo sed -i s/#baseurl/baseurl/ ${repo_file}
-RUN sudo sed -i s/mirrorlist.centos.org/vault.centos.org/ ${repo_file}
-RUN sudo sed -i s/mirror.centos.org/vault.centos.org/ ${repo_file}
-RUN sudo yum clean all
+FROM quay.io/pypa/manylinux2014_aarch64:2025-06-28-fa34399 as usd-core-wheel-builder
 
 RUN yum install -y libXt-devel
 
