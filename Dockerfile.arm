@@ -6,14 +6,15 @@ ENV LANGUAGE en_US:en
 WORKDIR /opt/USD
 
 RUN git clone https://github.com/PixarAnimationStudios/USD .
+RUN git reset --hard 17360ab530c1d0e721edf7d35aa0feb3f9a8ecaf
 
 # XXX:
 # The above manylinux2014 image contains CMake 3.20, but we require
-# 3.26+ for Python 3.10 support. Newer images include later cmake
+# 3.24+ for Python 3.10 support. Newer images include later cmake
 # versions but for some reason (possibly the use of gcc 10?) wheels
 # created from these images crash in TBB. So for now, we use this
 # older image but install a newer CMake.
-RUN pipx install --force cmake==3.26.03
+RUN pipx install --force cmake==3.24.3
 
 
 ### MY CHANGES FS
